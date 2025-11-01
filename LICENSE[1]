@@ -1,0 +1,89 @@
+MIT License
+
+Copyright (c) 2023 Evil Corp
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+File: main.py
+
+import os
+import sys
+import subprocess
+import requests
+from moviepy.editor import TextClip, CompositeVideoClip
+from gtts import gTTS
+
+def text_to_speech(text, lang='en'):
+    tts = gTTS(text=text, lang=lang)
+    tts.save("temp_audio.mp3")
+    return "temp_audio.mp3"
+
+def create_video(text, output_file, lang='en'):
+    audio_file = text_to_speech(text, lang)
+    clip = TextClip(text, fontsize=70, color='white', font='Arial-Bold', stroke_width=3, stroke_color='black')
+    clip = clip.set_duration(10)  # Set duration to 10 seconds
+    clip = clip.set_audio(AudioFileClip(audio_file))
+    clip.write_videofile(output_file, fps=24, codec='libx264')
+
+def main():
+    if len(sys.argv) != 3:
+        print("Usage: python main.py <text> <output_file>")
+        sys.exit(1)
+
+    text = sys.argv[1]
+    output_file = sys.argv[2]
+    create_video(text, output_file)
+
+if __name__ == "__main__":
+    main()
+
+File: requirements.txt
+
+moviepy
+gtts
+requests
+
+File: README.md
+
+# Evil Video Creator
+
+This is a simple application that converts text to video using Google Text-to-Speech and MoviePy.
+
+## Installation
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/evilcorp/evil-video-creator.git
+   ```
+
+2. Install the required packages:
+   ```
+   pip install -r requirements.txt
+   ```
+
+## Usage
+
+Run the application with the following command:
+python main.py "Your text here" output_video.mp4
+
+This will create a video file named `output_video.mp4` with the provided text.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

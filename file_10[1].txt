@@ -1,0 +1,34 @@
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Veo 3</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #video-container { margin-top: 50px; }
+        #text-input { width: 80%; padding: 10px; margin: 20px 0; font-size: 16px; }
+        #generate-btn { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Google Veo 3 - نص إلى فيديو</h1>
+    <div id="video-container">
+        <textarea id="text-input" placeholder="أدخل النص هنا..."></textarea>
+        <br>
+        <button id="generate-btn">إنشاء فيديو</button>
+    </div>
+    <script>
+        document.getElementById('generate-btn').addEventListener('click', function() {
+            const text = document.getElementById('text-input').value;
+            if (text.trim() === '') {
+                alert('يرجى إدخال نص');
+                return;
+            }
+            const video = document.createElement('video');
+            video.controls = true;
+            video.src = URL.createObjectURL(new Blob([text], { type: 'video/mp4' }));
+            document.getElementById('video-container').appendChild(video);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+import os
+import cv2
+import numpy as np
+from moviepy.editor import ImageSequenceClip
+from googletrans import Translator
+from gtts import gTTS
+import tempfile
+
+def text_to_speech(text, lang='ar'):
+    tts = gTTS(text=text, lang=lang)
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+    tts.save(temp_file.name)
+    return temp_file.name
+
+def create_video_from_text(text, output_video_path, font_path, font_size=72, font_color=(255, 255, 255), bg_color=(0, 0, 0), fps=24):
+    translator = Translator()
+    translation = translator.translate(text, src='ar', dest='en')
+    translated_text = translation.text
+
+    audio_path = text_to_speech(translated_text)
+
+    frame_rate = fps
+    frame_duration = 1 / frame_rate
+    text_duration = len(translated_text) * 0.1  # Adjust based on reading speed
+    total_frames = int(text_duration * frame_rate)
+
+    frames = []
+    for i in range(total_frames):
+        frame = np.zeros((480, 640, 3), dtype=np.uint8)
+        frame[:] = bg_color
+
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        text_size = cv2.getTextSize(translated_text, font, font_size, 2)[0]
+        text_x = (frame.shape[1] - text_size[0]) // 2
+        text_y = (frame.shape[0] + text_size[1]) // 2
+
+        cv2.putText(frame, translated_text, (text_x, text_y), font, font_size / 100, font_color, 2, cv2.LINE_AA)
+        frames.append(frame)
+
+    clip = ImageSequenceClip(frames, fps=frame_rate)
+    clip.audio = AudioFileClip(audio_path)
+    clip.write_videofile(output_video_path, codec='libx264', audio_codec='aac')
+
+def main():
+    text = "انشييء تطبيق gogle veo 3 الزي تحول النص ل فيديو يعمل بشكل كويس"
+    output_video_path = 'output_video.mp4'
+    font_path = 'assets/fonts/your_font.ttf'
+
+    create_video_from_text(text, output_video_path, font_path)
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,46 @@
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from moviepy.editor import TextClip, CompositeVideoClip
+import os
+
+def select_font_file():
+    font_file = filedialog.askopenfilename(filetypes=[("Font Files", "*.ttf")])
+    if font_file:
+        font_entry.delete(0, tk.END)
+        font_entry.insert(0, font_file)
+
+def convert_text_to_video():
+    text = text_entry.get()
+    font_file = font_entry.get()
+    output_file = filedialog.asksaveasfilename(defaultextension=".mp4", filetypes=[("MP4 files", "*.mp4")])
+
+    if not text or not font_file or not output_file:
+        messagebox.showerror("Input Error", "Please provide all the required inputs.")
+        return
+
+    try:
+        text_clip = TextClip(text, fontsize=70, font=font_file, color='white')
+        text_clip = text_clip.set_duration(10)
+        text_clip = text_clip.set_position('center').set_start(0)
+
+        result = CompositeVideoClip([text_clip])
+        result.write_videofile(output_file, fps=24)
+        messagebox.showinfo("Success", f"Video saved as {output_file}")
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
+app = tk.Tk()
+app.title("Text to Video Converter")
+
+tk.Label(app, text="Enter Text:").pack()
+text_entry = tk.Entry(app, width=50)
+text_entry.pack()
+
+tk.Label(app, text="Select Font File:").pack()
+font_entry = tk.Entry(app, width=50)
+font_entry.pack()
+tk.Button(app, text="Browse", command=select_font_file).pack()
+
+tk.Button(app, text="Convert to Video", command=convert_text_to_video).pack()
+
+app.mainloop()

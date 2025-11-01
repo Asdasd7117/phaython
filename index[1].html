@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Veo 3</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #video-container { margin-top: 20px; }
+        #video { width: 100%; height: auto; }
+    </style>
+</head>
+<body>
+    <h1>Google Veo 3 Text to Video Converter</h1>
+    <textarea id="text-input" placeholder="Enter your text here..." rows="10" cols="50"></textarea><br>
+    <button onclick="convertTextToVideo()">Convert to Video</button>
+    <div id="video-container">
+        <video id="video" controls></video>
+    </div>
+    <script>
+        function convertTextToVideo() {
+            const text = document.getElementById('text-input').value;
+            if (text.trim() === '') {
+                alert('Please enter some text.');
+                return;
+            }
+            const video = document.getElementById('video');
+            video.src = `data:video/mp4;base64,${btoa(text)}`;
+            video.load();
+        }
+    </script>
+</body>
+</html>

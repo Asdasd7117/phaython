@@ -1,0 +1,45 @@
+import os
+import cv2
+import numpy as np
+from moviepy.editor import ImageSequenceClip
+
+def text_to_video(text, output_path, font_path='assets/fonts/arial.ttf', font_size=72, font_color=(255, 255, 255), bg_color=(0, 0, 0), fps=30, duration=5):
+    from PIL import Image, ImageDraw, ImageFont
+
+    # Create a blank image with the specified background color
+    image_width, image_height = 1280, 720
+    image = Image.new('RGB', (image_width, image_height), bg_color)
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.truetype(font_path, font_size)
+
+    # Calculate the size of the text to be added
+    text_width, text_height = draw.textsize(text, font=font)
+
+    # Calculate the position to center the text
+    x = (image_width - text_width) / 2
+    y = (image_height - text_height) / 2
+
+    # Add the text to the image
+    draw.text((x, y), text, font=font, fill=font_color)
+
+    # Convert the PIL image to a NumPy array
+    image_array = np.array(image)
+
+    # Create a list to hold the frames of the video
+    frames = []
+
+    # Generate the frames for the video
+    for _ in range(int(fps * duration)):
+        frames.append(image_array)
+
+    # Create the video from the frames
+    clip = ImageSequenceClip(frames, fps=fps)
+    clip.write_videofile(output_path, codec='libx264')
+
+def main():
+    text = "Hello, this is a sample text to video conversion."
+    output_path = 'output_video.mp4'
+    text_to_video(text, output_path)
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,45 @@
+import os
+import cv2
+import numpy as np
+from moviepy.editor import ImageSequenceClip
+from gtts import gTTS
+from googletrans import Translator
+
+def text_to_speech(text, lang='ar'):
+    tts = gTTS(text=text, lang=lang)
+    tts.save("output.mp3")
+    return "output.mp3"
+
+def translate_text(text, dest='en'):
+    translator = Translator()
+    translation = translator.translate(text, dest=dest)
+    return translation.text
+
+def create_video_from_images(image_folder, output_video, fps=24):
+    images = [img for img in os.listdir(image_folder) if img.endswith(".png")]
+    images.sort()
+    frame_array = []
+    for i in range(len(images)):
+        img = cv2.imread(os.path.join(image_folder, images[i]))
+        height, width, layers = img.shape
+        size = (width, height)
+        frame_array.append(img)
+    out = cv2.VideoWriter(output_video, cv2.VideoWriter_fourcc(*'DIVX'), fps, size)
+    for i in range(len(frame_array)):
+        out.write(frame_array[i])
+    out.release()
+
+def add_audio_to_video(video_file, audio_file, output_file):
+    video_clip = ImageSequenceClip([video_file], fps=24)
+    audio_clip = video_clip.set_audio(audio_file)
+    audio_clip.write_videofile(output_file, codec='libx264')
+
+def main():
+    text = "انشييء تطبيق gogle veo 3 الزي تحول النص ل فيديو يعمل بشكل كويس"
+    translated_text = translate_text(text)
+    audio_file = text_to_speech(translated_text)
+    create_video_from_images("assets/images", "output_video.avi")
+    add_audio_to_video("output_video.avi", audio_file, "final_output_video.mp4")
+
+if __name__ == "__main__":
+    main()

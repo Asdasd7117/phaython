@@ -1,0 +1,31 @@
+import { createCanvas, loadImage } from 'canvas';
+import fs from 'fs';
+import path from 'path';
+import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
+
+const ffmpeg = createFFmpeg({ log: true });
+
+async function textToVideo(text, outputPath) {
+  await ffmpeg.load();
+  const canvas = createCanvas(1280, 720);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '48px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+  const buffer = canvas.toBuffer('image/png');
+  ffmpeg.FS('writeFile', 'input.png', new Uint8Array(buffer));
+
+  await ffmpeg.run('-i', 'input.png', '-vf', 'scale=1280:720', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', outputPath);
+
+  const data = ffmpeg.FS('readFile', outputPath);
+  fs.writeFileSync(outputPath, Buffer.from(data.buffer));
+}
+
+const text = "انشييء تطبيق gogle veo 3 الزي تحول النص ل فيديو يعمل بشكل كويس";
+const outputPath = path.join(__dirname, 'output.mp4');
+textToVideo(text, outputPath);

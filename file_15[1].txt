@@ -1,0 +1,67 @@
+import { createCanvas, loadImage } from 'canvas';
+import fs from 'fs';
+import path from 'path';
+import { createReadStream, createWriteStream } from 'fs';
+import { pipeline } from 'stream';
+import { promisify } from 'util';
+import ffmpeg from 'fluent-ffmpeg';
+import { exec } from 'child_process';
+
+const pipelineAsync = promisify(pipeline);
+
+const textToVideo = async (text, outputPath) => {
+  const canvas = createCanvas(1280, 720);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.font = '48px Arial';
+  ctx.fillStyle = '#FFFFFF';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+  const buffer = canvas.toBuffer('image/png');
+  const tempImagePath = path.join(__dirname, 'temp_image.png');
+  fs.writeFileSync(tempImagePath, buffer);
+
+  const tempVideoPath = path.join(__dirname, 'temp_video.mp4');
+  await new Promise((resolve, reject) => {
+    ffmpeg()
+      .input(tempImagePath)
+      .inputFormat('png')
+      .output(tempVideoPath)
+      .outputFormat('mp4')
+      .videoCodec('libx264')
+      .size('1280x720')
+      .duration(10)
+      .on('end', resolve)
+      .on('error', reject)
+      .run();
+  });
+
+  await new Promise((resolve, reject) => {
+    pipeline(
+      createReadStream(tempVideoPath),
+      createWriteStream(outputPath),
+      (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      }
+    );
+  });
+
+  fs.unlinkSync(tempImagePath);
+  fs.unlinkSync(tempVideoPath);
+};
+
+const main = async () => {
+  const text = 'Hello, this is a test video generated from text!';
+  const outputPath = path.join(__dirname, 'output_video.mp4');
+  await textToVideo(text, outputPath);
+  console.log(`Video saved to ${outputPath}`);
+};
+
+main().catch(console.error);
